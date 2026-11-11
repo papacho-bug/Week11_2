@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CALF Task Complexity English Trainer</title>
+  <style>
+    :root {
+      --primary: #4338ca;
+      --primary-light: #e0e7ff;
+      --primary-hover: #3730a3;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent-simple: #0284c7;
+      --accent-complex: #7c3aed;
+      --accent-green: #059669;
+      --accent-red: #dc2626;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      text-align: center;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    /* Filter & Selector */
+    .selector-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: var(--primary);
+    }
+
+    /* Task Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+    }
+
+    .task-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .meta-badge {
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      border-left: 4px solid var(--border);
+    }
+
+    .meta-badge strong {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .badge-simple { border-left-color: var(--accent-simple); }
+    .badge-complex { border-left-color: var(--accent-complex); }
+
+    .scene-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .scene-icons {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .scene-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1e293b;
+    }
+
+    .scene-instruction {
+      font-size: 0.95rem;
+      color: #475569;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Dialogue partner area */
+    .dialogue-prompt-box {
+      margin-top: 14px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 8px;
+      padding: 12px;
+      display: none;
+      text-align: left;
+    }
+
+    .dialogue-prompt-box.active {
+      display: block;
+    }
+
+    .dialogue-speaker {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    /* Planning Timer Area */
+    .timer-container {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .timer-val {
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #b45309;
+    }
+
+    /* Input & Speech Area */
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .task-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .btn-secondary { background: #f1f5f9; color: #334155; }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    .btn-record { background: #fee2e2; color: var(--accent-red); }
+    .btn-record.recording { background: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
+
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+    /* CALF Evaluation Board */
+    .calf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .calf-metric-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .calf-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .calf-score {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .calf-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* History table */
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Task Complexity & CALF Performance Trainer</h1>
+      <p>과업 복잡도(인지적 난이도 변인)와 과업 유형(독백 vs 대화)에 따라 영어 구어/문어 발화를 산출하고 CALF 지표로 다면 평가합니다.</p>
+    </header>
+
+    <!-- Selector Bar -->
+    <div class="selector-bar">
+      <div class="filter-group">
+        <span class="filter-label">복잡도:</span>
+        <select id="complexityFilter">
+          <option value="ALL">전체 과업 보기</option>
+          <option value="SIMPLE">Simple (Here & Now / Few Elements / Low Reasoning)</option>
+          <option value="COMPLEX">Complex (There & Then / Multi Elements / High Reasoning)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">과업 형식:</span>
+        <select id="interactionFilter">
+          <option value="ALL">전체 형식</option>
+          <option value="MONOLOGUE">Monologue (독백형)</option>
+          <option value="DIALOGUE">Dialogue (대화/상호작용형)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">과업 선택:</span>
+        <select id="taskSelect"></select>
+      </div>
+    </div>
+
+    <!-- Main Task Card -->
+    <main class="card">
+      <div class="task-meta-grid">
+        <div class="meta-badge" id="badgeComplexity">
+          <strong>Complexity Level</strong>
+          <span id="txtComplexity">-</span>
+        </div>
+        <div class="meta-badge" id="badgeTime">
+          <strong>Temporal Frame</strong>
+          <span id="txtTime">-</span>
+        </div>
+        <div class="meta-badge" id="badgeElements">
+          <strong>Elements & Reasoning</strong>
+          <span id="txtElements">-</span>
+        </div>
+        <div class="meta-badge" id="badgePlanning">
+          <strong>Planning Condition</strong>
+          <span id="txtPlanning">-</span>
+        </div>
+      </div>
+
+      <div id="planningSection" class="timer-container" style="display: none;">
+        <div>
+          <strong>⏳ Strategic Planning Time</strong>
+          <p style="font-size: 0.8rem; color: #78350f;">시작 전 구상할 수 있는 시간입니다. 메모하거나 구도를 잡으세요.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="timer-val" id="timerCount">01:00</span>
+          <button class="btn-secondary" id="timerBtn" style="padding: 4px 10px; font-size: 0.8rem;">타이머 시작</button>
+        </div>
+      </div>
+
+      <div class="scene-box">
+        <div class="scene-icons" id="sceneVisual">🔍</div>
+        <div class="scene-title" id="sceneTitle">Task Title</div>
+        <div class="scene-instruction" id="scenePrompt">Task Prompt</div>
+
+        <div class="dialogue-prompt-box" id="dialogueBox">
+          <div class="dialogue-speaker">상대방 화자 (Partner):</div>
+          <div id="dialoguePartnerUtterance" style="font-style: italic; color: #1e293b;">"..."</div>
+        </div>
+      </div>
+
+      <div>
+        <textarea id="taskInput" placeholder="이곳에 영어로 작성하거나, 아래 마이크 버튼을 눌러 음성으로 발화하세요..."></textarea>
+      </div>
+
+      <div class="task-controls">
+        <div class="button-group">
+          <button class="btn-record" id="micBtn">
+            <span id="micIcon">🎤</span> <span id="micLabel">음성 발화 시작</span>
+          </button>
+          <button class="btn-secondary" id="ttsBtn">🔊 내 발화 듣기</button>
+        </div>
+        <div class="button-group">
+          <button class="btn-secondary" id="sampleAnswerBtn">모범 답안 보기</button>
+          <button class="btn-primary" id="analyzeBtn">CALF 채점 및 기록</button>
+        </div>
+      </div>
+
+      <!-- Reference Answer Modal/Box -->
+      <div id="sampleBox" style="display:none; margin-top:16px; padding:12px; background:#f1f5f9; border-radius:8px;">
+        <strong style="font-size:0.85rem; color:#475569;">Reference Sample:</strong>
+        <p id="sampleText" style="margin-top:4px; font-size:0.92rem;"></p>
+      </div>
+
+      <!-- CALF Evaluation Results -->
+      <div class="calf-grid" id="calfSection" style="display:none;">
+        <div class="calf-metric-card">
+          <div class="calf-title">
+            <span>Complexity (복잡도)</span>
+            <span>C</span>
+          </div>
+          <div class="calf-score" id="scoreComplexity">0.0</div>
+          <div class="calf-desc" id="descComplexity">절(Clause)당 평균 단어 수(MLC) 및 복합문 비율</div>
+        </div>
+
+        <div class="calf-metric-card">
+          <div class="calf-title">
+            <span>Accuracy (정확도)</span>
+            <span>A</span>
+          </div>
+          <div class="calf-score" id="scoreAccuracy">0%</div>
+          <div class="calf-desc" id="descAccuracy">기본 문법/구두점/대문자 오류 없는 무오류 문장 비율</div>
+        </div>
+
+        <div class="calf-metric-card">
+          <div class="calf-title">
+            <span>Lexis (어휘 다양도)</span>
+            <span>L</span>
+          </div>
+          <div class="calf-score" id="scoreLexis">0.00</div>
+          <div class="calf-desc" id="descLexis">Type-Token Ratio (TTR: 전체 어휘 대비 고유 어휘 비율)</div>
+        </div>
+
+        <div class="calf-metric-card">
+          <div class="calf-title">
+            <span>Fluency (유창도)</span>
+            <span>F</span>
+          </div>
+          <div class="calf-score" id="scoreFluency">0 wpm</div>
+          <div class="calf-desc" id="descFluency">발화 속도(Word Count / Minute) 및 총 발화량</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- CALF Analytics History -->
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size: 1.15rem; font-weight:700;">CALF 수행 결과 누적 기록 (Task Complexity Comparison)</h2>
+        <button class="btn-secondary" id="exportBtn" style="padding:4px 10px; font-size:0.8rem;">CSV 내보내기</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>과업명</th>
+              <th>조건 (Complexity / Interaction)</th>
+              <th>발화 내용</th>
+              <th>Complexity</th>
+              <th>Accuracy</th>
+              <th>Lexis (TTR)</th>
+              <th>Fluency</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="7" style="text-align:center; color: var(--text-muted);">아직 채점된 기록이 없습니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // 1. Task Repository based on Skehan & Robinson's Task Complexity Framework
+    const taskDatabase = [
+      {
+        id: "T1",
+        title: "지금 보이는 방 설명하기",
+        complexity: "SIMPLE",
+        interaction: "MONOLOGUE",
+        timeCondition: "Here-and-Now (현재 눈앞 상황)",
+        elements: "단일 요소 (단순 공간)",
+        reasoning: "낮음 (단순 관찰 묘사)",
+        planningTime: false,
+        visual: "🛋️🖼️🪴",
+        prompt: "현재 당신의 눈앞에 있는 거실 풍경입니다. 지금 방 안에 무엇이 있고 어떤 상태인지 단순 현재형(Present Continuous / Simple Present)으로 묘사하세요.",
+        partnerUtterance: null,
+        sample: "In this room, there is a comfortable gray sofa by the wall. A green plant stands beside the table, and warm sunlight is coming through the window."
+      },
+      {
+        id: "T2",
+        title: "룸메이트와 방 가구 재배치 조율",
+        complexity: "SIMPLE",
+        interaction: "DIALOGUE",
+        timeCondition: "Here-and-Now (현재 눈앞 상황)",
+        elements: "2~3개 요소 (방 공간, 가구 위치)",
+        reasoning: "낮음 (단순 선호 교환)",
+        planningTime: false,
+        visual: "🛏️↔️📦",
+        prompt: "룸메이트가 방 구조를 바꾸자고 합니다. 현재 방의 모습을 보며 가구를 어디로 옮길지 제안에 답하세요.",
+        partnerUtterance: "Hey, do you think we should move the bed right next to the window, or keep it near the door?",
+        sample: "I think keeping the bed near the window is better because we can enjoy the fresh air and sunlight in the morning."
+      },
+      {
+        id: "T3",
+        title: "사고 목격 진술 및 경위 추론 (과거 회상)",
+        complexity: "COMPLEX",
+        interaction: "MONOLOGUE",
+        timeCondition: "There-and-Then (과거 기억 및 부재 상황)",
+        elements: "다수 요소 (차량 3대, 보행자, 날씨, 신호등)",
+        reasoning: "높음 (인과관계 및 책임 추론 요구)",
+        planningTime: true,
+        planningSeconds: 60,
+        visual: "🚗💥🚙🌧️🚦",
+        prompt: "어제 저녁 비 오는 교차로에서 일어난 연쇄 접촉사고를 목격했습니다. 사전에 제공된 1분의 구상 시간 동안 인과관계를 정리한 후, 왜 사고가 발생했는지 과거 시제와 원인/결과 접속사(because, although, consequently 등)를 사용해 구체적으로 진술하세요.",
+        partnerUtterance: null,
+        sample: "Yesterday evening around six, when the heavy rain began to fall, a silver sedan suddenly slipped and struck the delivery truck because the driver failed to notice the red signal."
+      },
+      {
+        id: "T4",
+        title: "예산 삭감 프로젝트 선정 토론 (의사결정)",
+        complexity: "COMPLEX",
+        interaction: "DIALOGUE",
+        timeCondition: "There-and-Then (과거 데이터 기반 미래 예측)",
+        elements: "다수 요소 (3개 부서, 예산 한도, 인력, 시장 리스크)",
+        reasoning: "높음 (대안 비교 및 논리적 설득/반박 요구)",
+        planningTime: true,
+        planningSeconds: 60,
+        visual: "📊📉⚖️💡",
+        prompt: "회사 임원 회의입니다. 과거 분기 실적 손실을 만회하기 위해 3개 프로젝트 중 하나를 중단해야 합니다. 파트너의 반대 논리를 반박하고 본인의 대안을 논리적으로 설득하세요.",
+        partnerUtterance: "We must immediately cancel Project C. Even though it has future potential, it is draining too much cash right now compared to Project A.",
+        sample: "Although Project C requires significant investment right now, abandoning it would waste all the research we completed last year. Instead, we should temporarily reduce marketing costs for Project A."
+      }
+    ];
+
+    let currentTask = null;
+    let planningTimer = null;
+    let secondsLeft = 0;
+    let recognition = null;
+    let isRecording = false;
+    let speechStartTime = null;
+    let speechDurationSec = 0;
+    const historyRecords = [];
+
+    // DOM References
+    const complexityFilter = document.getElementById("complexityFilter");
+    const interactionFilter = document.getElementById("interactionFilter");
+    const taskSelect = document.getElementById("taskSelect");
+
+    const txtComplexity = document.getElementById("txtComplexity");
+    const txtTime = document.getElementById("txtTime");
+    const txtElements = document.getElementById("txtElements");
+    const txtPlanning = document.getElementById("txtPlanning");
+    const badgeComplexity = document.getElementById("badgeComplexity");
+
+    const planningSection = document.getElementById("planningSection");
+    const timerCount = document.getElementById("timerCount");
+    const timerBtn = document.getElementById("timerBtn");
+
+    const sceneVisual = document.getElementById("sceneVisual");
+    const sceneTitle = document.getElementById("sceneTitle");
+    const scenePrompt = document.getElementById("scenePrompt");
+    const dialogueBox = document.getElementById("dialogueBox");
+    const dialoguePartnerUtterance = document.getElementById("dialoguePartnerUtterance");
+
+    const taskInput = document.getElementById("taskInput");
+    const micBtn = document.getElementById("micBtn");
+    const micLabel = document.getElementById("micLabel");
+    const ttsBtn = document.getElementById("ttsBtn");
+    const sampleAnswerBtn = document.getElementById("sampleAnswerBtn");
+    const sampleBox = document.getElementById("sampleBox");
+    const sampleText = document.getElementById("sampleText");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+
+    const calfSection = document.getElementById("calfSection");
+    const scoreComplexity = document.getElementById("scoreComplexity");
+    const scoreAccuracy = document.getElementById("scoreAccuracy");
+    const scoreLexis = document.getElementById("scoreLexis");
+    const scoreFluency = document.getElementById("scoreFluency");
+    const descComplexity = document.getElementById("descComplexity");
+    const descAccuracy = document.getElementById("descAccuracy");
+    const descLexis = document.getElementById("descLexis");
+    const descFluency = document.getElementById("descFluency");
+    const historyTableBody = document.getElementById("historyTableBody");
+    const exportBtn = document.getElementById("exportBtn");
+
+    // Filter Tasks
+    function populateTaskOptions() {
+      const compVal = complexityFilter.value;
+      const intVal = interactionFilter.value;
+
+      const filtered = taskDatabase.filter(t => {
+        const matchComp = (compVal === "ALL" || t.complexity === compVal);
+        const matchInt = (intVal === "ALL" || t.interaction === intVal);
+        return matchComp && matchInt;
+      });
+
+      taskSelect.innerHTML = "";
+      if (filtered.length === 0) {
+        const opt = document.createElement("option");
+        opt.textContent = "해당 조건의 과업이 없습니다.";
+        taskSelect.appendChild(opt);
+        return;
+      }
+
+      filtered.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t.id;
+        opt.textContent = `[${t.complexity}] ${t.title} (${t.interaction})`;
+        taskSelect.appendChild(opt);
+      });
+
+      loadTask(filtered[0].id);
+    }
+
+    function loadTask(id) {
+      currentTask = taskDatabase.find(t => t.id === id);
+      if (!currentTask) return;
+
+      // Meta Data
+      txtComplexity.textContent = currentTask.complexity;
+      badgeComplexity.className = `meta-badge ${currentTask.complexity === 'SIMPLE' ? 'badge-simple' : 'badge-complex'}`;
+      txtTime.textContent = currentTask.timeCondition;
+      txtElements.textContent = `${currentTask.elements} / 추론: ${currentTask.reasoning}`;
+      txtPlanning.textContent = currentTask.planningTime ? `계획시간 제공 (${currentTask.planningSeconds}초)` : "No Planning Time (즉시 발화)";
+
+      // Planning Timer Setup
+      clearInterval(planningTimer);
+      if (currentTask.planningTime) {
+        planningSection.style.display = "flex";
+        secondsLeft = currentTask.planningSeconds;
+        updateTimerDisplay();
+        timerBtn.disabled = false;
+        timerBtn.textContent = "타이머 시작";
+      } else {
+        planningSection.style.display = "none";
+      }
+
+      // Visuals & Instructions
+      sceneVisual.textContent = currentTask.visual;
+      sceneTitle.textContent = currentTask.title;
+      scenePrompt.textContent = currentTask.prompt;
+      sampleText.textContent = currentTask.sample;
+      sampleBox.style.display = "none";
+
+      if (currentTask.interaction === "DIALOGUE" && currentTask.partnerUtterance) {
+        dialogueBox.classList.add("active");
+        dialoguePartnerUtterance.textContent = `"${currentTask.partnerUtterance}"`;
+      } else {
+        dialogueBox.classList.remove("active");
+      }
+
+      // Reset Input
+      taskInput.value = "";
+      calfSection.style.display = "none";
+      speechDurationSec = 0;
+    }
+
+    // Timer Controls
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+      const secs = String(secondsLeft % 60).padStart(2, "0");
+      timerCount.textContent = `${mins}:${secs}`;
+    }
+
+    timerBtn.addEventListener("click", () => {
+      timerBtn.disabled = true;
+      planningTimer = setInterval(() => {
+        secondsLeft--;
+        updateTimerDisplay();
+        if (secondsLeft <= 0) {
+          clearInterval(planningTimer);
+          timerBtn.textContent = "시간 종료!";
+          alert("계획 시간이 종료되었습니다! 이제 발화를 시작하세요.");
+        }
+      }, 1000);
+    });
+
+    // Event Listeners for Filters
+    complexityFilter.addEventListener("change", populateTaskOptions);
+    interactionFilter.addEventListener("change", populateTaskOptions);
+    taskSelect.addEventListener("change", (e) => loadTask(e.target.value));
+
+    // STT (Web Speech API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        isRecording = true;
+        micBtn.classList.add("recording");
+        micLabel.textContent = "발화 중... (클릭 시 정지)";
+        speechStartTime = Date.now();
+      };
+
+      recognition.onresult = (e) => {
+        let transcript = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          transcript += e.results[i][0].transcript;
+        }
+        if (e.results[e.resultIndex].isFinal) {
+          const prev = taskInput.value.trim();
+          taskInput.value = prev ? `${prev} ${transcript.trim()}` : transcript.trim();
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.error("STT Error:", e.error);
+        stopSpeech();
+      };
+
+      recognition.onend = () => {
+        stopSpeech();
+      };
+    } else {
+      micBtn.disabled = true;
+      micLabel.textContent = "STT 미지원 브라우저";
+    }
+
+    function stopSpeech() {
+      if (isRecording && speechStartTime) {
+        speechDurationSec += (Date.now() - speechStartTime) / 1000;
+      }
+      isRecording = false;
+      micBtn.classList.remove("recording");
+      micLabel.textContent = "음성 발화 시작";
+      if (recognition) recognition.stop();
+    }
+
+    micBtn.addEventListener("click", () => {
+      if (!recognition) return;
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    });
+
+    // TTS
+    ttsBtn.addEventListener("click", () => {
+      const text = taskInput.value.trim();
+      if (!text) {
+        alert("재생할 텍스트가 없습니다.");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-US";
+      window.speechSynthesis.speak(u);
+    });
+
+    // Sample Answer Toggle
+    sampleAnswerBtn.addEventListener("click", () => {
+      sampleBox.style.display = sampleBox.style.display === "none" ? "block" : "none";
+    });
+
+    // CALF Engine: Complexity, Accuracy, Lexis, Fluency Calculation
+    function calculateCALF(text, durationSec) {
+      const words = text.match(/\b[a-zA-Z]+('[a-zA-Z]+)?\b/g) || [];
+      const totalWords = words.length;
+
+      if (totalWords === 0) {
+        return {
+          complexity: { score: 0, desc: "발화 없음" },
+          accuracy: { score: 0, desc: "발화 없음" },
+          lexis: { score: 0, desc: "발화 없음" },
+          fluency: { score: 0, desc: "발화 없음" }
+        };
+      }
+
+      // 1. Complexity (구문적 복잡도: MLC & 종속절 접속사 빈도)
+      // 문장 분리 (. ! ? 또는 줄바꿈)
+      const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      const sentenceCount = sentences.length || 1;
+      const meanLengthSentence = (totalWords / sentenceCount).toFixed(1);
+
+      // 복문 지표: Subordinating & Coordinating conjunctions
+      const complexMarkers = text.match(/\b(because|although|though|if|unless|since|while|whereas|which|who|that|consequently|therefore|despite|however)\b/gi) || [];
+      const subordinationRatio = (complexMarkers.length / sentenceCount).toFixed(2);
+      const compScore = ((parseFloat(meanLengthSentence) * 0.5) + (complexMarkers.length * 1.5)).toFixed(1);
+
+      // 2. Accuracy (정확도 지표: Error-Free Sentence / Basic Rules approximation)
+      let errorCount = 0;
+      sentences.forEach(s => {
+        // 소문자로 시작하는 경우
+        if (s.length > 0 && s[0] !== s[0].toUpperCase()) errorCount++;
+        // 'a' 뒤에 모음 발음 명사 직접 오는 기본 오류 추적 (an hour / an apple)
+        if (/\ba\s+[aeiou][a-z]+/i.test(s)) errorCount++;
+        // 3인칭 단수 he/she/it 뒤 be동사 수일치 기본 오류 (he are, they is)
+        if (/\b(he|she|it)\s+(are|were)\b/i.test(s)) errorCount++;
+        if (/\b(they|we|you)\s+(is|was)\b/i.test(s)) errorCount++;
+      });
+      const errorFreeRatio = Math.max(0, Math.min(100, Math.round(((sentenceCount - errorCount) / sentenceCount) * 100)));
+
+      // 3. Lexis (어휘 다양도: Type-Token Ratio & Academic/Sophisticated Lexicon)
+      const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+      const ttr = (uniqueWords.size / totalWords).toFixed(2);
+      
+      // 4. Fluency (유창도: Words Per Minute)
+      // 음성 녹음 시간 기준, 없을 경우 일반적 타이핑/읽기 추산(30초 기준)
+      const effectiveDuration = durationSec > 3 ? durationSec : (totalWords / 2.5); // Fallback: 150 wpm 기준 시간
+      const minutes = effectiveDuration / 60;
+      const wpm = Math.round(totalWords / minutes);
+
+      return {
+        complexity: {
+          score: compScore,
+          desc: `MLC: ${meanLengthSentence} w/s, 복합문 표지: ${complexMarkers.length}개`
+        },
+        accuracy: {
+          score: `${errorFreeRatio}%`,
+          desc: `총 ${sentenceCount}문장 중 규칙 준수율 (오류 감지: ${errorCount}개)`
+        },
+        lexis: {
+          score: ttr,
+          desc: `TTR: ${ttr} (총 ${totalWords}개 단어 중 어휘 다양도 ${uniqueWords.size}종)`
+        },
+        fluency: {
+          score: `${wpm} WPM`,
+          desc: `총 발화: ${totalWords}단어 (소요 시간 약 ${Math.round(effectiveDuration)}초)`
+        }
+      };
+    }
+
+    // Analyze and Store
+    analyzeBtn.addEventListener("click", () => {
+      const text = taskInput.value.trim();
+      if (!text) {
+        alert("채점할 영어 텍스트를 작성하거나 말해주세요.");
+        return;
+      }
+
+      if (isRecording) {
+        stopSpeech();
+      }
+
+      const calf = calculateCALF(text, speechDurationSec);
+
+      // Render CALF Cards
+      calfSection.style.display = "grid";
+      scoreComplexity.textContent = calf.complexity.score;
+      descComplexity.textContent = calf.complexity.desc;
+
+      scoreAccuracy.textContent = calf.accuracy.score;
+      descAccuracy.textContent = calf.accuracy.desc;
+
+      scoreLexis.textContent = calf.lexis.score;
+      descLexis.textContent = calf.lexis.desc;
+
+      scoreFluency.textContent = calf.fluency.score;
+      descFluency.textContent = calf.fluency.desc;
+
+      // Add to History
+      const record = {
+        title: currentTask.title,
+        condition: `${currentTask.complexity} / ${currentTask.interaction}`,
+        text: text,
+        complexity: calf.complexity.score,
+        accuracy: calf.accuracy.score,
+        lexis: calf.lexis.score,
+        fluency: calf.fluency.score
+      };
+      historyRecords.unshift(record);
+      renderHistoryTable();
+    });
+
+    function renderHistoryTable() {
+      historyTableBody.innerHTML = "";
+      if (historyRecords.length === 0) {
+        historyTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">아직 채점된 기록이 없습니다.</td></tr>';
+        return;
+      }
+
+      historyRecords.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(r.title)}</strong></td>
+          <td><span style="font-size:0.75rem; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${escapeHtml(r.condition)}</span></td>
+          <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(r.text)}">${escapeHtml(r.text)}</td>
+          <td><strong>${r.complexity}</strong></td>
+          <td>${r.accuracy}</td>
+          <td>${r.lexis}</td>
+          <td>${r.fluency}</td>
+        `;
+        historyTableBody.appendChild(tr);
+      });
+    }
+
+    // CSV Export
+    exportBtn.addEventListener("click", () => {
+      if (historyRecords.length === 0) {
+        alert("내보낼 데이터가 없습니다.");
+        return;
+      }
+      let csv = "과업명,과업조건,발화내용,Complexity,Accuracy,Lexis(TTR),Fluency(WPM)\n";
+      historyRecords.forEach(r => {
+        const safeText = `"${r.text.replace(/"/g, '""')}"`;
+        csv += `"${r.title}","${r.condition}",${safeText},${r.complexity},${r.accuracy},${r.lexis},${r.fluency}\n`;
+      });
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `CALF_Task_Results_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, function (s) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s];
+      });
+    }
+
+    // Initialize
+    populateTaskOptions();
+  </script>
+</body>
+</html>
